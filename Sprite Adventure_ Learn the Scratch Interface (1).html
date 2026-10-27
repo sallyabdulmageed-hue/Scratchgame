@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sprite Adventure: Learn the Scratch Interface</title>
+<style>
+:root{--bg:#fff7e6;--card:#ffffff;--ink:#2b2350;--muted:#6b6490;--accent:#ff8c1a;--blue:#4c97ff;--green:#2fb26a;--red:#e5484d;--line:#e8dcc4;--motion:#4c97ff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1733;--card:#2a2450;--ink:#fff4dc;--muted:#b9b2e0;--line:#453d78}}
+:root[data-theme="dark"]{--bg:#1b1733;--card:#2a2450;--ink:#fff4dc;--muted:#b9b2e0;--line:#453d78}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Arial,sans-serif;font-size:20px;line-height:1.35}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:34px;margin:8px 0;text-align:center}
+h2{font-size:26px;margin:6px 0 12px}
+.card{background:var(--card);border:3px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px}
+.center{text-align:center}
+.big{font-size:64px;line-height:1}
+button{font:inherit;font-weight:700;color:#fff;background:var(--blue);border:0;border-radius:16px;padding:14px 20px;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.25);min-height:54px}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.25)}
+button.orange{background:var(--accent)}button.green{background:var(--green)}button.red{background:var(--red)}
+button:disabled{opacity:.5}
+.menu button{display:block;width:100%;margin:12px 0;font-size:24px}
+.opt{display:block;width:100%;margin:10px 0;background:var(--card);color:var(--ink);border:3px solid var(--blue);text-align:left;box-shadow:none}
+.opt.right{background:var(--green);color:#fff;border-color:var(--green)}
+.opt.wrong{background:var(--red);color:#fff;border-color:var(--red)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.top button{padding:8px 14px;min-height:44px;font-size:16px}
+.stars{font-size:26px}
+.msg{min-height:56px;font-weight:700;margin:10px 0}
+.good{color:var(--green)}.bad{color:var(--red)}
+.board{position:relative;width:100%;aspect-ratio:6/5;background:#d9f2ff;border:4px solid var(--blue);border-radius:16px;overflow:hidden;
+background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:calc(100%/6) calc(100%/5)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .board{background-color:#2b3f73}}
+:root[data-theme="dark"] .board{background-color:#2b3f73}
+.tile{position:absolute;width:calc(100%/6);height:20%;display:flex;align-items:center;justify-content:center;font-size:clamp(24px,8vw,44px)}
+.sprite{position:absolute;width:calc(100%/6);height:20%;display:flex;align-items:center;justify-content:center;font-size:clamp(26px,9vw,48px);transition:left .4s,top .4s,transform .4s}
+.sprite span{display:block;position:relative}
+.sprite span::after{content:"➤";position:absolute;right:-.55em;top:50%;transform:translateY(-50%);font-size:.45em;color:var(--accent)}
+.blocks{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.blk{background:var(--motion);color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;font-size:18px;box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.script{min-height:70px;display:flex;flex-wrap:wrap;gap:8px;padding:10px;border:3px dashed var(--blue);border-radius:14px}
+.script .blk.on{outline:4px solid var(--accent)}
+.hint{color:var(--muted);font-size:17px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.in{font:inherit;width:84px;padding:6px;border:3px solid var(--blue);border-radius:10px;background:var(--card);color:var(--ink);text-align:center}
+.rowb{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+var app=document.getElementById("app"),stars=0;
+function esc(s){return s}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+function topBar(){return '<div class="top"><button class="orange" onclick="menu()">🏠 Home</button><div class="stars">⭐ '+stars+'</div></div>'}
+
+function menu(){
+  app.innerHTML='<div class="card center menu"><div class="big">🐱</div><h1>Sprite Adventure</h1><p>Learn the Scratch screen and help the cat move!</p>'+
+  '<button class="green" onclick="startQuiz()">🔎 Game 1: Scratch Detective</button>'+
+  '<button class="orange" onclick="startMaze(0)">⭐ Game 2: Cat Path Puzzle</button>'+
+  '<button onclick="startCh()">🎯 Game 3: Slide Challenges</button>'+
+  '<p class="hint">Stars collected: '+stars+'</p></div>';
+}
+
+/* ---------- Game 1: quiz ---------- */
+var QS=[
+ {q:"Where do you drag blocks to build a script?",a:"The Code area",w:["The Stage","The keyboard"],e:"The Code area is where we drag and drop blocks to make a script."},
+ {q:"What do we call the main area where the cat moves and we see the output?",a:"The Stage",w:["The Code area","The Script"],e:"The Stage is the main working area of Scratch."},
+ {q:"What is a sprite?",a:"An object that does the actions",w:["A kind of keyboard","A picture frame"],e:"A sprite (like the cat) is the object that performs all the actions."},
+ {q:"A script is a set of blocks connected in a…",a:"Particular order",w:["Random pile","Different colour"],e:"A script is a series of blocks connected in a particular order."},
+ {q:"Which block category has the move and turn blocks?",a:"Motion",w:["Sound","Looks"],e:"Motion blocks move and turn a sprite."},
+ {q:"How many degrees should the sprite turn to stand upside down?",a:"180",w:["90","10"],e:"Half a full turn is 180 degrees, and that makes the sprite upside down!"},
+ {q:"Does the order of the blocks matter?",a:"Yes! The script runs in the order the blocks are connected",w:["No, any order is the same","Only on Mondays"],e:"Move then turn is different from turn then move."},
+ {q:"How can you delete a block you do not need?",a:"Drag it back to the blocks palette",w:["Click on the Stage","Turn the sprite"],e:"You can also right-click and choose delete, or press the Delete key."}
+];
+var qi=0,qs=0,order=[];
+function startQuiz(){qi=0;qs=0;order=shuffle(QS);showQ()}
+function showQ(){
+  if(qi>=order.length){
+    app.innerHTML=topBar()+'<div class="card center"><div class="big">🏆</div><h2>You scored '+qs+' out of '+order.length+'!</h2><p>'+(qs>=order.length-1?"Super Scratch expert!":qs>=5?"Great job, detective!":"Good try! Play again to find more clues.")+'</p><div class="row" style="justify-content:center"><button class="green" onclick="startQuiz()">Play again</button><button class="orange" onclick="startMaze(0)">Try the Cat Path</button></div></div>';
+    return;
+  }
+  var q=order[qi],opts=shuffle([q.a].concat(q.w));
+  app.innerHTML=topBar()+'<div class="card"><div class="hint">Question '+(qi+1)+' of '+order.length+'</div><h2>'+q.q+'</h2><div id="opts"></div><div class="msg" id="fb"></div><div id="nx"></div></div>';
+  var box=document.getElementById("opts");
+  opts.forEach(function(o){
+    var b=document.createElement("button");b.className="opt";b.textContent=o;
+    b.onclick=function(){answer(b,o===q.a,q)};box.appendChild(b);
+  });
+}
+function answer(b,ok,q){
+  var all=document.querySelectorAll(".opt");
+  all.forEach(function(x){x.disabled=true;if(x.textContent===q.a)x.className="opt right"});
+  var fb=document.getElementById("fb");
+  if(ok){qs++;stars++;fb.className="msg good";fb.textContent="🎉 Correct! "+q.e}
+  else{b.className="opt wrong";fb.className="msg bad";fb.textContent="Not quite. "+q.e}
+  document.getElementById("nx").innerHTML='<button class="orange" onclick="qi++;showQ()">Next ➜</button>';
+}
+
+/* ---------- Game 2: cat path ---------- */
+var LV=[
+ {sx:0,sy:2,gx:3,gy:2,rocks:[],hint:"Tap Move to go forward."},
+ {sx:0,sy:0,gx:3,gy:2,rocks:[],hint:"Go right, then turn to go down."},
+ {sx:0,sy:4,gx:4,gy:1,rocks:[],hint:"Turn left to face up."},
+ {sx:0,sy:1,gx:4,gy:3,rocks:[[2,1],[2,2]],hint:"Rocks block the way. Find a path around them!"}
+];
+var lv=0,sc=[],dir=0,px=0,py=0,running=false;
+function startMaze(i){lv=i;sc=[];running=false;drawMaze()}
+function drawMaze(){
+  var L=LV[lv];px=L.sx;py=L.sy;dir=0;
+  var rocks=L.rocks.map(function(r){return '<div class="tile" style="left:'+(r[0]*100/6)+'%;top:'+(r[1]*20)+'%">🪨</div>'}).join("");
+  app.innerHTML=topBar()+'<div class="card"><div class="hint">Puzzle '+(lv+1)+' of '+LV.length+'</div><h2>Help the cat reach the star!</h2>'+
+  '<div class="board" id="bd">'+rocks+'<div class="tile" style="left:'+(L.gx*100/6)+'%;top:'+(L.gy*20)+'%">⭐</div><div class="sprite" id="sp"><span>🐱</span></div></div>'+
+  '<p class="hint">'+L.hint+' Each Move goes 1 square. Tap a block in your script to delete it.</p>'+
+  '<div class="blocks"><button class="blk" onclick="add(\'m\')">➡ Move 1 step</button><button class="blk" onclick="add(\'r\')">↻ Turn right 90°</button><button class="blk" onclick="add(\'l\')">↺ Turn left 90°</button></div>'+
+  '<div class="hint">Your script:</div><div class="script" id="sc"></div>'+
+  '<div class="msg" id="fb"></div>'+
+  '<div class="row"><button class="green" id="go" onclick="run()">▶ Run</button><button class="red" onclick="sc=[];running=false;drawMaze()">🗑 Clear all</button></div></div>';
+  place();showScript(-1);
+}
+function place(){var s=document.getElementById("sp");if(!s)return;s.style.left=(px*100/6)+"%";s.style.top=(py*20)+"%";s.style.transform="rotate("+(dir*90)+"deg)"}
+function label(c){return c==="m"?"➡ Move 1 step":c==="r"?"↻ Turn right 90°":"↺ Turn left 90°"}
+function showScript(on){
+  var el=document.getElementById("sc");if(!el)return;el.innerHTML="";
+  if(!sc.length){el.innerHTML='<span class="hint">Tap blocks above to add them here.</span>';return}
+  sc.forEach(function(c,i){var b=document.createElement("div");b.className="blk"+(i===on?" on":"");b.textContent=(i+1)+". "+label(c);
+    b.onclick=function(){if(running)return;sc.splice(i,1);showScript(-1)};el.appendChild(b)});
+}
+function add(c){if(running)return;sc.push(c);showScript(-1)}
+function setMsg(t,c){var f=document.getElementById("fb");f.textContent=t;f.className="msg "+(c||"")}
+async function run(){
+  if(running)return;
+  if(!sc.length){setMsg("Add some blocks first!","bad");return}
+  var L=LV[lv];running=true;px=L.sx;py=L.sy;dir=0;place();setMsg("Running…");
+  var dx=[1,0,-1,0],dy=[0,1,0,-1];
+  for(var i=0;i<sc.length;i++){
+    await sleep(500);showScript(i);var c=sc[i];
+    if(c==="r")dir=(dir+1)%4;else if(c==="l")dir=(dir+3)%4;
+    else{
+      var nx=px+dx[dir],ny=py+dy[dir];
+      var hit=nx<0||nx>5||ny<0||ny>4||L.rocks.some(function(r){return r[0]===nx&&r[1]===ny});
+      if(hit){setMsg("Oops! The cat bumped into something. Fix your script and try again.","bad");running=false;showScript(i);return}
+      px=nx;py=ny;
+    }
+    place();
+  }
+  await sleep(500);showScript(-1);running=false;
+  if(px===L.gx&&py===L.gy){
+    stars++;
+    var last=lv>=LV.length-1;
+    setMsg("🎉 You got the star!","good");
+    document.querySelector(".row").innerHTML=last?'<button class="green" onclick="startQuiz()">All done! Play Scratch Detective</button><button class="orange" onclick="startMaze(0)">Play again</button>':'<button class="green" onclick="startMaze('+(lv+1)+')">Next puzzle ➜</button>';
+  }else setMsg("Not at the star yet. Change your script and try again!","bad");
+}
+/* ---------- Game 3: slide challenges ---------- */
+var CHQ=[
+{t:"Challenge 1: Moving across the stage",q:"The cat stands at the left end of the stage. How many steps does it need to reach the other end?",v:"",a:"480 steps",w:["48 steps","100 steps"],e:"The Scratch stage is 480 steps wide, so the cat needs 480 steps to cross it!"},
+{t:"Challenge 2: Turning a sprite",q:"How many degrees should the sprite turn to stand upside down?",v:"",a:"180 degrees",w:["90 degrees","360 degrees"],e:"A half turn is 180°. A full turn of 360° brings the cat back to where it started."},
+{t:"Challenge 3: Identify the output",q:"You click the “move 50 steps” block in each script. What happens?",v:'<div style="display:flex;gap:28px;flex-wrap:wrap;justify-content:center;margin:10px 0"><div><div class="hint">Script A</div><div class="blk" style="border-radius:12px 12px 0 0">move 50 steps</div><div class="blk" style="border-radius:0 0 12px 12px">turn ↻ 30 degrees</div></div><div><div class="hint">Script B</div><div class="blk">move 50 steps</div><div class="blk" style="margin-top:16px">turn ↻ 30 degrees</div></div></div>',a:"A: moves, then turns. B: only moves",w:["A and B both move and turn","A: only moves. B: moves, then turns"],e:"Connected blocks work together as one script. In B the turn block is not connected, so it does not run."}
+];
+var chi=0;
+function startCh(){chi=0;showCh()}
+function showCh(){
+  if(chi>3){app.innerHTML=topBar()+'<div class="card center"><div class="big">🏅</div><h2>You finished all the challenges!</h2><div class="row" style="justify-content:center"><button class="green" onclick="startCh()">Play again</button><button class="orange" onclick="menu()">Home</button></div></div>';return}
+  if(chi===3){show4();return}
+  var q=CHQ[chi],opts=shuffle([q.a].concat(q.w));
+  app.innerHTML=topBar()+'<div class="card"><div class="hint">'+q.t+'</div><h2>'+q.q+'</h2>'+q.v+'<div id="opts"></div><div class="msg" id="fb"></div><div id="nx"></div></div>';
+  var box=document.getElementById("opts");
+  opts.forEach(function(o){var b=document.createElement("button");b.className="opt";b.textContent=o;b.onclick=function(){ans3(b,o===q.a,q)};box.appendChild(b)});
+}
+function ans3(b,ok,q){
+  document.querySelectorAll(".opt").forEach(function(x){x.disabled=true;if(x.textContent===q.a)x.className="opt right"});
+  var fb=document.getElementById("fb");
+  if(ok){stars++;fb.className="msg good";fb.textContent="🎉 Correct! "+q.e}else{b.className="opt wrong";fb.className="msg bad";fb.textContent="Not quite. "+q.e}
+  document.getElementById("nx").innerHTML='<button class="orange" onclick="chi++;showCh()">Next ➜</button>';
+}
+var TG=[[20,30],[80,30],[80,90],[140,90]];
+function show4(){
+  app.innerHTML=topBar()+'<div class="card"><div class="hint">Challenge 4: Move the sprite along the path</div><h2>Fill in the blocks so the cat follows the dashed path.</h2>'+
+  '<svg id="svg4" viewBox="0 0 300 200" style="width:100%;border:4px solid var(--blue);border-radius:16px;background:var(--card)"></svg>'+
+  '<div class="rowb"><div class="blk">move 100 steps</div></div>'+
+  '<div class="rowb"><div class="blk">turn ↻</div><input class="in" id="t1" type="number" inputmode="numeric"><span>degrees</span></div>'+
+  '<div class="rowb"><div class="blk">move</div><input class="in" id="m2" type="number" inputmode="numeric"><span>steps</span></div>'+
+  '<div class="rowb"><div class="blk">turn ↺</div><input class="in" id="t2" type="number" inputmode="numeric"><span>degrees</span></div>'+
+  '<div class="rowb"><div class="blk">move</div><input class="in" id="m3" type="number" inputmode="numeric"><span>steps</span></div>'+
+  '<div class="msg" id="fb"></div><div class="row" id="nx"><button class="green" onclick="run4()">▶ Run</button></div></div>';
+  draw4([[20,30]],false);
+}
+function draw4(p,ok){
+  var s='<polyline points="'+TG.map(function(a){return a.join(",")}).join(" ")+'" fill="none" stroke-width="4" stroke-dasharray="8 6" style="stroke:var(--muted)"/>';
+  if(p.length>1)s+='<polyline points="'+p.map(function(a){return a.join(",")}).join(" ")+'" fill="none" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" style="stroke:'+(ok?'var(--green)':'var(--accent)')+'"/>';
+  s+='<text x="6" y="44" font-size="30">🐱</text>';
+  document.getElementById("svg4").innerHTML=s;
+}
+function run4(){
+  var v=function(id){return parseFloat(document.getElementById(id).value)};
+  var t1=v("t1"),m2=v("m2"),t2=v("t2"),m3=v("m3");
+  if([t1,m2,t2,m3].some(isNaN)){var f=document.getElementById("fb");f.className="msg bad";f.textContent="Fill in every empty box first!";return}
+  var p=[[20,30]],ang=0,x=20,y=30,sc=0.6;
+  function mv(n){x+=Math.cos(ang*Math.PI/180)*n*sc;y+=Math.sin(ang*Math.PI/180)*n*sc;p.push([Math.round(x),Math.round(y)])}
+  mv(100);ang+=t1;mv(m2);ang-=t2;mv(m3);
+  var ok=p.every(function(a,i){return Math.abs(a[0]-TG[i][0])<=1&&Math.abs(a[1]-TG[i][1])<=1});
+  draw4(p,ok);
+  var fb=document.getElementById("fb");
+  if(ok){stars++;fb.className="msg good";fb.textContent="🎉 Perfect! The cat followed the path!";document.getElementById("nx").innerHTML='<button class="green" onclick="chi++;showCh()">Finish ➜</button>'}
+  else{fb.className="msg bad";fb.textContent="The cat went a different way. Hint: the cat turns right to go down, then left to go along again."}
+}
+menu();
+</script>
+</body>
+</html>
